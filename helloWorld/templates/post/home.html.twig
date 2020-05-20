@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <a class="navbar-brand" href="#">reseau social Company</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarColor01">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/personnes">Gestion des effectifs</a>
+                </li>
+                {# <li class="nav-item">
+                    <a class="nav-link" href="/comments">creer un post</a>
+                </li> #}
+                <li class="nav-item">
+                    <a href="{{path('security_registration')}}" type="button" class="btn btn-primary">Inscription</a>
+                </li>
+                <li class="nav-item">
+                <a type="button" class="btn btn-primary" href="{{path('security_login')}}">Connexion</a>
+                </li>
+                <li class="nav-item">
+                <a type="button" class="btn btn-primary" href="{{path('security_logout')}}">Déconnexion</a>
+                </li>
+               
+            </ul>
+             <div class="btn-group" role="group" aria-label="Button group with nested dropdown">
+            
+            <div class="btn-group" role="group">
+                    <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Notifications</button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1" style="">
+                        <a class="dropdown-item" href="#">
+                            {% for notificationUser in notificationUsers %} 
+                                {% if notificationUser.notification.post %}
+                                    <a href="{{path('notification_flag',{'id' : notificationUser.id})}}" >{{notificationUser.notification.post.idUser.username}} a publié un post</a> <br>
+                                {% elseif notificationUser.notification.liker %}
+                                    <a href="{{path('notification_flag',{'id' : notificationUser.id})}}">{{notificationUser.notification.liker.idUser.username}} a like le post de : {{notificationUser.notification.liker.post.idUser.username}} </a> <br>
+                                {% else %}    
+                                    <a href="{{path('notification_flag',{'id' : notificationUser.id})}}">{{notificationUser.notification.comments.idUser.username}} a commenté le post de : {{notificationUser.notification.comments.idPost.idUser.username}}<br> </a>  
+                                {% endif %} 
+                            {% endfor %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+    </nav>
+
+    <h1 class="text-center">{{title}} </h1>
+
+
+
+<div class="container">
+    <div class="jumbotron">
+        <div class="col-lg-10  ">          
+            {{form_start(formPost)}}
+                {{form_widget(formPost)}}
+            {{form_end(formPost)}}
+        </div>     
+    </div>              
+                <hr class="my-4">
+
+
+        
+    {% for post in posts %}
+        <div class="jumbotron">
+            <div class="container">  
+                    <div class="col row justify-content-end">
+                        <a href="{{path('post_delete', {'id' : post.id})}}"><i class="fas fa-trash-alt" ></i>
+                        </a>
+                    </div>
+                    <div class="col row justify-content-start">  
+
+                        <div class="col-8">
+                           <h6> pseudo :   {{ app.user.username }} <br></h6>
+                        </div>
+                        <div class="col-8">
+                           <h4> Post:    {{post.content}}</h4>
+                        </div>
+
+                    </div>
+
+                    <div class="col row justify-content-center">    
+                        <div>
+                            <img  src="{{post.displayPhoto}}" class="img-fluid" alt="Responsive image" >   
+                        </div>
+                        <div class="w-100"></div>
+                        <a href="{{path('post_like',{id: post.id})}}" class="btn btn-link js-like">
+                            {% if app.user and post.isLikedbyUser(app.user) %}
+                                <i class="fas fa-thumbs-up"></i>
+                            {% else %}
+                                <i class="far fa-thumbs-up"></i>
+                            {% endif %}
+                            <span class="js-likes">{{post.Liker | length }}</span> 
+                            <span class="js-label">J'aime</span>
+                        </a>
+                        <div class="w-100"></div>
+                        <div class="card bg-light mb-3" style="width: 70%;">
+                        {% for comment in post.idComments %} 
+                            <div class="card-header">Commentaire: 
+                              <a href="{{path('comment_delete', {'id' : comment.id})}}"><i class="fas fa-trash"></i> </a> 
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                
+                                  <br>  {{comment.contents}} <br> 
+                        
+                                </p>
+                            </div>
+                        {% endfor %}    
+                        </div>
+
+                        <div  style="width: 70%;">
+                            <form method="post" action="{{path('commentaire',{id: post.id})}}">
+                                <label for="exampleTextarea" name="post">Ton Commentaire</label>
+                                <textarea class="form-control" id="exampleTextarea" rows="3" name="commentaire"></textarea>
+                                <input type="submit" name="Valider" />    
+                            </form>
+                        </div> 
+                    </div>   
+            </div>
+        </div>
+    {% endfor %} 
+        
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+    
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        function onClickBtnLike(event){
+            event.preventDefault();
+            const url = this.href;
+            const spanCount = this.querySelector('span.js-likes');
+            const icone = this.querySelector('i');
+
+            axios.get(url).then(function(response){
+                spanCount.textContent = response.data.likes;  
+
+                if(icone.classList.contains('fas')) {
+                    icone.classList.replace('fas', 'far');
+                }else{ 
+                    icone.classList.replace('far', 'fas');
+                }
+            }).catch(function(error){
+                if(error.response.status === 403){
+                    windows.alert("vous ne pouvez pas liker sans etre connecté")
+                }
+            });
+            
+        }
+        document.querySelectorAll('a.js-like').forEach(function(link){
+            link.addEventListener('click', onClickBtnLike);
+        })
+
+    </script>
+{% endblock %}

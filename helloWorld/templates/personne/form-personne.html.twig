@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% form_theme formPersonne 'bootstrap_4_layout.html.twig' %}
+
+
+{% block title %} Ajouter une nouvelle personne {% endblock %}
+
+{% block body %}
+
+    <h1> Ajouter une nouvelle personne </h1>
+        
+
+        {{form_start(formPersonne)}}
+             {{form_widget(formPersonne)}}
+        {{form_end(formPersonne)}}    
+
+        
+
+   <!-- <form method="post" action="{{path('person_create')}}"> 
+        <input type="text" name="prenom" />
+        <input type="text" name="nom" />
+        <input type="text" name="salaire" />
+        <input type="submit" name="ajouter la personne" />    
+    </form> -->
+
+{% endblock %}    
+
+{% block javascripts %}
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <script>
+     $('#personne_adresse_nomRue').keyup(function(event){
+            queryNumero= $('#personne_adresse_nomRue').val();
+            queryNomRue= $('#personne_adresse_numeroRue').val(); 
+            $.ajax({url: "https://api-adresse.data.gouv.fr/search/?q="+queryNumero+"+"+queryNomRue+"",  
+                 success: function(response){
+                    $('#search').remove()
+                    div = $('<div id="search">')
+                    list = $('<ul class="list-group">')
+                    response.features.forEach(function (index){
+                        item = $('<li class="list-group-item list-group-item-action">');
+                        a = $('<a onclick="fillFields(event, this)" href="">');
+                        a.html(index.properties.label);
+                        item.append(a);
+                        list.append(item);
+                    })
+                    div.append(list);
+                    $('#personne_adresse_nomRue').after(div);
+
+                },        
+                error:function(event){
+                    alert("adresse non trouvée veuillez vérifier l'orthographe");
+                }
+            });    
+    
+        });
+
+
+        function fillFields(event, x)
+        {
+             event.preventDefault();
+             axios.get('https://api-adresse.data.gouv.fr/search/?q='+x.innerHTML).then(function(data)
+                {
+                     var res = data.data.features[0].properties.name;
+                    $('#personne_adresse_nomRue').val(res)
+                    $('#personne_adresse_codePostal').val(data.data.features[0].properties.postcode)
+                    $('#personne_adresse_ville').val(data.data.features[0].properties.city)
+                    $('#personne_adresse_pays').val('France')
+                });
+
+        }
+
+        $(window).click(function ()
+        {
+            $('#search').remove()
+        });
+    </script>
+    
+    
+{% endblock %}
+

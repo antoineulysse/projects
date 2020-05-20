@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello Antoine{% endblock %}
+
+{% block body %}
+
+    <h1>Liste des personnes</h1>
+    <a class="btn btn-success" href="{{path('person_create')}}">Ajouter une nouvelle Personne </a>
+    
+                
+    <a class="btn btn-danger" href="{{path('security_logout')}}" >Déconnexion</a>
+           
+<table class="table">
+    <tr>
+        <th>ID</th>
+        <th>Prenom</th>
+        <th>Nom</th>
+        <th>Salaire</th>
+        <th>Détail</th>
+        <th>Adresse</th>
+    </tr> 
+    {% for person in persons %}
+        <tr>
+            <td>{{person.id}}</td>
+            <td>{{person.prenom}}</td>
+            <td>{{person.nom}}</td>
+            <td>{{person.salaire}}</td>
+            <td>{{person.adresse.numeroRue}}{{person.adresse.nomRue}} <br/> {{person.adresse.codePostal}} {{person.adresse.ville}} <br/> {{person.adresse.pays}}</td>
+            <td>
+                <a class="btn btn-primary" href="{{path('person_detail', {'id' : person.id})}}">Détail
+                </a>
+            </td> 
+            <td>
+                <a class="btn btn-warning" href="{{path('person_edit', {'id' : person.id})}}">Modifier
+                </a>
+            </td> 
+            <td>
+                <a class="btn btn-danger" href="{{path('person_delete', {'id' : person.id})}}">Supprimer
+                </a>
+            </td> 
+        </tr>
+    {% endfor %}   
+{% endblock %}

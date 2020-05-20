@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+{% block body %}
+   
+
+
+<div class="container">
+
+
+        
+    
+        <div class="jumbotron">
+            <div class="container">  
+                    <div class="col row justify-content-end">
+                        <i class="fas fa-trash-alt" ><a href="{{path('post_delete', {'id' : post.id})}}">
+                        </a></i>
+                    </div>
+                    <div class="col row justify-content-start">  
+
+                        <div class="col-8">
+                           <h6> pseudo :   {{ app.user.username }} <br></h6>
+                        </div>
+                        <div class="col-8">
+                           <h4> Post:    {{post.content}}</h4>
+                        </div>
+
+                    </div>
+
+                    <div class="col row justify-content-center">    
+                        <div>
+                            <img  src="{{post.displayPhoto}}" class="img-fluid" alt="Responsive image" >   
+                        </div>
+                        <div class="w-100"></div>
+                        <a href="{{path('post_like',{id: post.id})}}" class="btn btn-link js-like">
+                            {% if app.user and post.isLikedbyUser(app.user) %}
+                                <i class="fas fa-thumbs-up"></i>
+                            {% else %}
+                                <i class="far fa-thumbs-up"></i>
+                            {% endif %}
+                            <span class="js-likes">{{post.Liker | length }}</span> 
+                            <span class="js-label">J'aime</span>
+                        </a>
+                        <div class="w-100"></div>
+                        <div class="card bg-light mb-3" style="width: 70%;">
+                        {% for comment in post.idComments %} 
+                            <div class="card-header">Commentaire: 
+                              <a href="{{path('comment_delete', {'id' : comment.id})}}"><i class="fas fa-trash"></i> </a> 
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                
+                                  <br>  {{comment.contents}} <br> 
+                        
+                                </p>
+                            </div>
+                        {% endfor %}    
+                        </div>
+
+                        <div  style="width: 70%;">
+                            <form method="post" action="{{path('commentaire',{id: post.id})}}">
+                                <label for="exampleTextarea" name="post">Ton Commentaire</label>
+                                <textarea class="form-control" id="exampleTextarea" rows="3" name="commentaire"></textarea>
+                                <input type="submit" name="Valider" />    
+                            </form>
+                        </div> 
+                    </div>   
+            </div>
+        </div>
+
+        
+        <a type="button" class="btn btn-primary" href="/home">Retour à la HomePage <span class="sr-only">(current)</span></a>
+    
+        
+</div>
+
+
+
+
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} detail de la personne {% endblock %}
+
+{% block body %}
+    <p> Je m'appelle {{detailPerson.prenom}} {{detailPerson.nom}}.
+        mon salaire est de: {{detailPerson.salaire}}
+    </p>
+{% endblock %}    
