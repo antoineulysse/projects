@@ -6,6 +6,8 @@ use App\Entity\Ad;
 use App\Entity\Role;
 use App\Entity\User;
 use App\Entity\Image;
+use App\Entity\Booking;
+use App\Entity\Comment;
 use Faker\Factory as FakerFactory;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
@@ -33,7 +35,7 @@ class AppFixtures extends Fixture
                   ->setLastName('de Broucker')
                   ->setEmail('antoineulysse@gmail.com')
                   ->setHash($this->encoder->encodePassword($adminUser, 'password'))
-                  ->setPicture('https://avatars.io/twitter/DeBroucker')
+                  ->setPicture('https://korben.info/app/uploads/2020/03/familyguy.jpg')
                   ->setIntroduction($faker->sentence())
                   ->setDescription('<p>' . join('</p><p>', $faker->paragraphs(3)) . '</p>')
                   ->addUserRole($adminRole);
@@ -97,6 +99,43 @@ class AppFixtures extends Fixture
                       ->setCaption($faker->sentence())
                       ->setAd($ad);
                       $manager->persist($image);
+
+            }
+
+            // Gestion des réservations
+
+            for($k=1;$k<= mt_rand(0,10);$k++){
+                $booking= new Booking();
+                $createdAt= $faker->dateTimeBetween('-6 months');
+                $startDate= $faker->dateTimeBetween('-3 months');
+
+            // gestion de la date de fin
+                $duration = mt_rand(3,10);
+                $endDate =(clone $startDate)->modify("+$duration days");
+                $amount  = $ad->getPrice()*$duration;
+                $booker  = $users[mt_rand(0, count ($users) -1)];
+                $comment = $faker->paragraph();
+
+                $booking->setBooker($booker)
+                        ->setAd($ad)
+                        ->setStartDate($startDate)
+                        ->setEndDate($endDate)
+                        ->setCreatedAt($createdAt)
+                        ->setAmount($amount)
+                        ->setComment($comment)  ;
+
+                $manager->persist($booking);
+                // gestion des commentaires
+
+                if(mt_rand(0, 1)){
+                    $comment = new Comment();
+                    $comment ->setContent($faker->paragraph())
+                             ->setRating(mt_rand(1, 5))
+                             ->setAuthor($booker)
+                             ->setAd($ad);
+                    $manager->persist($comment);
+
+                }
 
             }
         
